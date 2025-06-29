@@ -928,7 +928,7 @@ function App() {
                 </div>
 
                 {/* Token Selection (Borrow) */}
-                <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 relative z-30 overflow-visible">
+                {/* <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 relative z-30 overflow-visible">
                   <h3 className="text-xl font-semibold mb-4 flex items-center">
                     <DollarSign className="w-5 h-5 mr-2 text-orange-400" />
                     Select Token to Borrow
@@ -975,10 +975,10 @@ function App() {
                       </div>
                     </DropdownPortal>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Chain Selection */}
-                <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 relative z-30 overflow-visible">
+                {/* <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 relative z-30 overflow-visible">
                   <h3 className="text-xl font-semibold mb-4 flex items-center">
                     <Layers className="w-5 h-5 mr-2 text-orange-400" />
                     Select Chain
@@ -1021,7 +1021,7 @@ function App() {
                       </div>
                     </DropdownPortal>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Lending Amount */}
                 <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6">
