@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Flame, 
   Shield, 
@@ -28,6 +28,7 @@ import {
   RefreshCw,
   Home
 } from 'lucide-react';
+import { DropdownPortal } from './DropdownPortal';
 
 function App() {
   const [isVisible, setIsVisible] = useState(false);
@@ -49,6 +50,9 @@ function App() {
   const [transactionData, setTransactionData] = useState<any>(null);
   const [selectedLoanForRepay, setSelectedLoanForRepay] = useState<any>(null);
   const [repayBtcAddress, setRepayBtcAddress] = useState('');
+  const tokenDropdownRef = useRef(null);
+  const chainDropdownRef = useRef(null);
+  const lendTokenDropdownRef = useRef(null);
 
   useEffect(() => {
     setIsVisible(true);
@@ -870,14 +874,15 @@ function App() {
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Lending Configuration Form */}
               <div className="lg:col-span-2 space-y-6">
-                {/* Token Selection */}
-                <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6">
+                {/* Token Selection (Lend) */}
+                <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 relative z-30 overflow-visible">
                   <h3 className="text-xl font-semibold mb-4 flex items-center">
                     <DollarSign className="w-5 h-5 mr-2 text-green-400" />
                     Select Token to Lend
                   </h3>
                   <div className="relative">
                     <button
+                      ref={lendTokenDropdownRef}
                       onClick={() => setShowLendTokenDropdown(!showLendTokenDropdown)}
                       className="w-full p-4 bg-gray-700/50 border border-gray-600 rounded-xl flex items-center justify-between hover:border-green-500/50 transition-colors"
                     >
@@ -893,9 +898,8 @@ function App() {
                         <ChevronDown className="w-5 h-5" />
                       </div>
                     </button>
-                    
-                    {showLendTokenDropdown && (
-                      <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-700 rounded-xl overflow-hidden z-20">
+                    <DropdownPortal open={showLendTokenDropdown} targetRef={lendTokenDropdownRef}>
+                      <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl text-white">
                         {tokens.map((token) => (
                           <button
                             key={token.symbol}
@@ -919,7 +923,103 @@ function App() {
                           </button>
                         ))}
                       </div>
-                    )}
+                    </DropdownPortal>
+                  </div>
+                </div>
+
+                {/* Token Selection (Borrow) */}
+                <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 relative z-30 overflow-visible">
+                  <h3 className="text-xl font-semibold mb-4 flex items-center">
+                    <DollarSign className="w-5 h-5 mr-2 text-orange-400" />
+                    Select Token to Borrow
+                  </h3>
+                  <div className="relative">
+                    <button
+                      ref={tokenDropdownRef}
+                      onClick={() => setShowTokenDropdown(!showTokenDropdown)}
+                      className="w-full p-4 bg-gray-700/50 border border-gray-600 rounded-xl flex items-center justify-between hover:border-orange-500/50 transition-colors"
+                    >
+                      <div className="flex items-center">
+                        <span className="text-2xl mr-3">{tokens.find(t => t.symbol === selectedToken)?.icon}</span>
+                        <div className="text-left">
+                          <div className="font-semibold">{selectedToken}</div>
+                          <div className="text-sm text-gray-400">{tokens.find(t => t.symbol === selectedToken)?.name}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-green-400 text-sm mr-2">{tokens.find(t => t.symbol === selectedToken)?.rate} APR</span>
+                        <ChevronDown className="w-5 h-5" />
+                      </div>
+                    </button>
+                    <DropdownPortal open={showTokenDropdown} targetRef={tokenDropdownRef}>
+                      <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl text-white">
+                        {tokens.map((token) => (
+                          <button
+                            key={token.symbol}
+                            onClick={() => {
+                              setSelectedToken(token.symbol);
+                              setShowTokenDropdown(false);
+                            }}
+                            className="w-full p-4 hover:bg-gray-700 flex items-center justify-between transition-colors"
+                          >
+                            <div className="flex items-center">
+                              <span className="text-2xl mr-3">{token.icon}</span>
+                              <div className="text-left">
+                                <div className="font-semibold">{token.symbol}</div>
+                                <div className="text-sm text-gray-400">{token.name}</div>
+                              </div>
+                            </div>
+                            <span className="text-green-400 text-sm">{token.rate} APR</span>
+                          </button>
+                        ))}
+                      </div>
+                    </DropdownPortal>
+                  </div>
+                </div>
+
+                {/* Chain Selection */}
+                <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 relative z-30 overflow-visible">
+                  <h3 className="text-xl font-semibold mb-4 flex items-center">
+                    <Layers className="w-5 h-5 mr-2 text-orange-400" />
+                    Select Chain
+                  </h3>
+                  <div className="relative">
+                    <button
+                      ref={chainDropdownRef}
+                      onClick={() => setShowChainDropdown(!showChainDropdown)}
+                      className="w-full p-4 bg-gray-700/50 border border-gray-600 rounded-xl flex items-center justify-between hover:border-orange-500/50 transition-colors"
+                    >
+                      <div className="flex items-center">
+                        <span className="text-2xl mr-3">{chains.find(c => c.name === selectedChain)?.icon}</span>
+                        <div className="text-left">
+                          <div className="font-semibold">{selectedChain}</div>
+                          <div className="text-sm text-gray-400">Network fee: {chains.find(c => c.name === selectedChain)?.fee}</div>
+                        </div>
+                      </div>
+                      <ChevronDown className="w-5 h-5" />
+                    </button>
+                    <DropdownPortal open={showChainDropdown} targetRef={chainDropdownRef}>
+                      <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl text-white">
+                        {chains.map((chain) => (
+                          <button
+                            key={chain.name}
+                            onClick={() => {
+                              setSelectedChain(chain.name);
+                              setShowChainDropdown(false);
+                            }}
+                            className="w-full p-4 hover:bg-gray-700 flex items-center justify-between transition-colors"
+                          >
+                            <div className="flex items-center">
+                              <span className="text-2xl mr-3">{chain.icon}</span>
+                              <div className="text-left">
+                                <div className="font-semibold">{chain.name}</div>
+                                <div className="text-sm text-gray-400">Network fee: {chain.fee}</div>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </DropdownPortal>
                   </div>
                 </div>
 
@@ -1116,6 +1216,7 @@ function App() {
                   </h3>
                   <div className="relative">
                     <button
+                      ref={tokenDropdownRef}
                       onClick={() => setShowTokenDropdown(!showTokenDropdown)}
                       className="w-full p-4 bg-gray-700/50 border border-gray-600 rounded-xl flex items-center justify-between hover:border-orange-500/50 transition-colors"
                     >
@@ -1131,9 +1232,8 @@ function App() {
                         <ChevronDown className="w-5 h-5" />
                       </div>
                     </button>
-                    
-                    {showTokenDropdown && (
-                      <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-700 rounded-xl overflow-hidden z-20">
+                    <DropdownPortal open={showTokenDropdown} targetRef={tokenDropdownRef}>
+                      <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl text-white">
                         {tokens.map((token) => (
                           <button
                             key={token.symbol}
@@ -1154,7 +1254,7 @@ function App() {
                           </button>
                         ))}
                       </div>
-                    )}
+                    </DropdownPortal>
                   </div>
                 </div>
 
@@ -1166,6 +1266,7 @@ function App() {
                   </h3>
                   <div className="relative">
                     <button
+                      ref={chainDropdownRef}
                       onClick={() => setShowChainDropdown(!showChainDropdown)}
                       className="w-full p-4 bg-gray-700/50 border border-gray-600 rounded-xl flex items-center justify-between hover:border-orange-500/50 transition-colors"
                     >
@@ -1178,9 +1279,8 @@ function App() {
                       </div>
                       <ChevronDown className="w-5 h-5" />
                     </button>
-                    
-                    {showChainDropdown && (
-                      <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-700 rounded-xl overflow-hidden z-20">
+                    <DropdownPortal open={showChainDropdown} targetRef={chainDropdownRef}>
+                      <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl text-white">
                         {chains.map((chain) => (
                           <button
                             key={chain.name}
@@ -1200,7 +1300,7 @@ function App() {
                           </button>
                         ))}
                       </div>
-                    )}
+                    </DropdownPortal>
                   </div>
                 </div>
 
