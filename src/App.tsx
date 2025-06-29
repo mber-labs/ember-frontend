@@ -30,6 +30,46 @@ import {
 } from 'lucide-react';
 import { DropdownPortal } from './DropdownPortal';
 
+// Persistent Prototype Banner
+function PrototypeBanner() {
+  return (
+    <div className="w-full bg-yellow-500 text-black text-center py-2 px-4 font-semibold text-sm shadow-lg z-[100] fixed top-0 left-0">
+      ⚠️ Notice: No active ember nodes are running, atleast 1 ember node must run to communicate with ember network.
+    </div>
+  );
+}
+
+// Prototype Notice Modal
+function PrototypeNoticeModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+      <div className="bg-yellow-100 text-black rounded-2xl shadow-xl p-8 max-w-md w-full relative border-2 border-yellow-400">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-yellow-700 hover:text-black text-xl font-bold"
+          aria-label="Close"
+        >
+          ×
+        </button>
+        <div className="flex flex-col items-center">
+          <div className="text-4xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold mb-2 text-center">Notice</h2>
+          <p className="text-center text-base mb-4">
+             No active ember nodes are running, atleast 1 ember node must run to communicate with ember network.<br/>
+          </p>
+          <button
+            onClick={onClose}
+            className="mt-2 px-6 py-2 bg-yellow-400 text-black rounded-lg font-semibold hover:bg-yellow-500 transition"
+          >
+            Got it
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [isVisible, setIsVisible] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
@@ -53,6 +93,7 @@ function App() {
   const tokenDropdownRef = useRef(null);
   const chainDropdownRef = useRef(null);
   const lendTokenDropdownRef = useRef(null);
+  const [showPrototypeNotice, setShowPrototypeNotice] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
@@ -134,15 +175,20 @@ function App() {
     }
   ];
 
+  // Helper to show the modal after actions
+  const showNotice = () => setShowPrototypeNotice(true);
+
   const handleWalletConnect = (walletName: string) => {
     setConnectedWallet(walletName);
     setShowWalletModal(false);
+    showNotice();
     console.log(`Connecting to ${walletName} wallet...`);
   };
 
   const handleMetaMaskConnect = () => {
     setConnectedMetaMask('0x742d35Cc6634C0532925a3b8D');
     setShowMetaMaskModal(false);
+    showNotice();
     console.log('Connecting to MetaMask...');
   };
 
@@ -150,21 +196,26 @@ function App() {
     setConnectedWallet(null);
     setConnectedMetaMask(null);
     setCurrentPage('home');
+    showNotice();
   };
 
   const handleGetLoan = () => {
     if (connectedWallet) {
       setCurrentPage('loan');
+      showNotice();
     } else {
       setShowWalletModal(true);
+      showNotice();
     }
   };
 
   const handleLendTokens = () => {
     if (connectedMetaMask) {
       setCurrentPage('lend');
+      showNotice();
     } else {
       setShowMetaMaskModal(true);
+      showNotice();
     }
   };
 
@@ -188,6 +239,7 @@ function App() {
     });
     
     setCurrentPage('transaction');
+    showNotice();
   };
 
   const handleExecuteLend = () => {
@@ -207,11 +259,13 @@ function App() {
     });
     
     setCurrentPage('transaction');
+    showNotice();
   };
 
   const handleRepayLoan = (loan: any) => {
     setSelectedLoanForRepay(loan);
     setCurrentPage('repay-loan');
+    showNotice();
   };
 
   const handleExecuteRepayment = () => {
@@ -228,6 +282,7 @@ function App() {
     });
     
     setCurrentPage('transaction');
+    showNotice();
   };
 
   const copyToClipboard = async (text: string) => {
@@ -336,6 +391,7 @@ function App() {
   if (currentPage === 'transaction') {
     return (
       <div className="min-h-screen bg-gray-900 text-white">
+        <PrototypeBanner />
         {/* Background Effects */}
         <div className="fixed inset-0 bg-gradient-to-br from-green-500/10 via-blue-500/5 to-purple-500/10"></div>
         <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-green-400/20 via-transparent to-transparent"></div>
@@ -516,6 +572,7 @@ function App() {
 
   // Manage Loans Page
   if (currentPage === 'manage-loans') {
+    <PrototypeBanner />
     return (
       <div className="min-h-screen bg-gray-900 text-white">
         {/* Background Effects */}
@@ -661,6 +718,7 @@ function App() {
 
   // Repay Loan Page
   if (currentPage === 'repay-loan') {
+    <PrototypeBanner />
     return (
       <div className="min-h-screen bg-gray-900 text-white">
         {/* Background Effects */}
@@ -816,6 +874,7 @@ function App() {
 
   // Lending Page
   if (currentPage === 'lend') {
+    <PrototypeBanner />
     return (
       <div className="min-h-screen bg-gray-900 text-white">
         {/* Background Effects */}
@@ -1449,477 +1508,481 @@ function App() {
 
   // Main Homepage
   return (
-    <div className="min-h-screen bg-gray-900 text-white overflow-hidden">
-      {/* Background Effects */}
-      <div className="fixed inset-0 bg-gradient-to-br from-orange-500/10 via-red-500/5 to-yellow-500/10"></div>
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-400/20 via-transparent to-transparent"></div>
-      
-      {/* Wallet Connection Modals */}
-      {showWalletModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-md relative">
-            <button 
-              onClick={() => setShowWalletModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-            
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Wallet className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold mb-2">Connect Bitcoin Wallet</h2>
-              <p className="text-gray-400">Choose your preferred Bitcoin wallet to get started</p>
-            </div>
-            
-            <div className="space-y-3">
-              {bitcoinWallets.map((wallet, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleWalletConnect(wallet.name)}
-                  className="w-full p-4 bg-gray-700/50 hover:bg-gray-700 border border-gray-600 hover:border-orange-500/50 rounded-xl transition-all duration-200 text-left group"
-                >
-                  <div className="flex items-center">
-                    <span className="text-2xl mr-4">{wallet.icon}</span>
-                    <div>
-                      <div className="font-semibold group-hover:text-orange-400 transition-colors">
-                        {wallet.name}
-                      </div>
-                      <div className="text-sm text-gray-400">{wallet.description}</div>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-            
-            <div className="mt-6 p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
-              <div className="flex items-start">
-                <Shield className="w-5 h-5 text-orange-400 mr-3 mt-0.5 flex-shrink-0" />
-                <div className="text-sm">
-                  <div className="font-medium text-orange-300 mb-1">Secure Connection</div>
-                  <div className="text-orange-200/80">Your Bitcoin stays in your wallet. We never have custody of your funds.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showMetaMaskModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-md relative">
-            <button 
-              onClick={() => setShowMetaMaskModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-            
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Wallet className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold mb-2">Connect MetaMask</h2>
-              <p className="text-gray-400">Connect your MetaMask wallet to start lending</p>
-            </div>
-            
-            <button
-              onClick={handleMetaMaskConnect}
-              className="w-full p-4 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 rounded-xl transition-all duration-200 text-center group mb-4"
-            >
-              <div className="flex items-center justify-center">
-                <span className="text-2xl mr-4">🦊</span>
-                <div>
-                  <div className="font-semibold">MetaMask</div>
-                  <div className="text-sm opacity-80">Connect using browser extension</div>
-                </div>
-              </div>
-            </button>
-            
-            <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
-              <div className="flex items-start">
-                <Shield className="w-5 h-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
-                <div className="text-sm">
-                  <div className="font-medium text-green-300 mb-1">Secure Lending</div>
-                  <div className="text-green-200/80">Your funds are protected by Bitcoin over-collateralization.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Navigation */}
-      <nav className="relative z-50 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="p-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg">
-              <Flame className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
-              Ember Protocol
-            </span>
-          </div>
-          
-          <div className="hidden md:flex items-center space-x-8">
-            <a href="#how-it-works" className="text-gray-300 hover:text-white transition-colors">How It Works</a>
-            <a href="#features" className="text-gray-300 hover:text-white transition-colors">Features</a>
-            <a href="#stats" className="text-gray-300 hover:text-white transition-colors">Stats</a>
-            
-            {connectedWallet || connectedMetaMask ? (
-              <div className="flex items-center space-x-3">
-                {connectedWallet && (
-                  <div className="flex items-center px-3 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                    <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                    <span className="text-sm text-green-300">{connectedWallet}</span>
-                  </div>
-                )}
-                {connectedMetaMask && (
-                  <div className="flex items-center px-3 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
-                    <span className="text-sm text-blue-300">{connectedMetaMask.slice(0, 8)}...{connectedMetaMask.slice(-6)}</span>
-                  </div>
-                )}
-                <button 
-                  onClick={() => setCurrentPage('manage-loans')}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-sm"
-                >
-                  Manage Loans
-                </button>
-                <button 
-                  onClick={handleDisconnect}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-sm"
-                >
-                  Disconnect
-                </button>
-              </div>
-            ) : (
+    <>
+      <PrototypeBanner />
+      <PrototypeNoticeModal open={showPrototypeNotice} onClose={() => setShowPrototypeNotice(false)} />
+      <div className="min-h-screen bg-gray-900 text-white overflow-hidden pt-10">
+        {/* Background Effects */}
+        <div className="fixed inset-0 bg-gradient-to-br from-orange-500/10 via-red-500/5 to-yellow-500/10"></div>
+        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-400/20 via-transparent to-transparent"></div>
+        
+        {/* Wallet Connection Modals */}
+        {showWalletModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-md relative">
               <button 
-                onClick={() => setShowWalletModal(true)}
-                className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-200 transform hover:scale-105"
+                onClick={() => setShowWalletModal(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
               >
-                Connect Wallet
+                <X className="w-6 h-6" />
               </button>
-            )}
-          </div>
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <main className="relative z-10 px-6 pt-20 pb-32">
-        <div className="max-w-7xl mx-auto">
-          <div className={`text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <div className="mb-8">
-              <div className="inline-flex items-center px-4 py-2 bg-orange-500/10 border border-orange-500/20 rounded-full mb-6">
-                <Bitcoin className="w-4 h-4 text-orange-400 mr-2" />
-                <span className="text-sm text-orange-300">Native Bitcoin Collateralized Loans</span>
+              
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Wallet className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Connect Bitcoin Wallet</h2>
+                <p className="text-gray-400">Choose your preferred Bitcoin wallet to get started</p>
+              </div>
+              
+              <div className="space-y-3">
+                {bitcoinWallets.map((wallet, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleWalletConnect(wallet.name)}
+                    className="w-full p-4 bg-gray-700/50 hover:bg-gray-700 border border-gray-600 hover:border-orange-500/50 rounded-xl transition-all duration-200 text-left group"
+                  >
+                    <div className="flex items-center">
+                      <span className="text-2xl mr-4">{wallet.icon}</span>
+                      <div>
+                        <div className="font-semibold group-hover:text-orange-400 transition-colors">
+                          {wallet.name}
+                        </div>
+                        <div className="text-sm text-gray-400">{wallet.description}</div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              
+              <div className="mt-6 p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+                <div className="flex items-start">
+                  <Shield className="w-5 h-5 text-orange-400 mr-3 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm">
+                    <div className="font-medium text-orange-300 mb-1">Secure Connection</div>
+                    <div className="text-orange-200/80">Your Bitcoin stays in your wallet. We never have custody of your funds.</div>
+                  </div>
+                </div>
               </div>
             </div>
-            
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-white via-orange-200 to-red-200 bg-clip-text text-transparent">
-                Unlock Liquidity
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-orange-400 via-red-400 to-yellow-400 bg-clip-text text-transparent">
-                From Your Bitcoin
-              </span>
-            </h1>
-            
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
-              Get instant USDC/USDT loans using your native Bitcoin as collateral. 
-              No bridging, no wrapping, no complexity - just one click to liquidity.
-            </p>
+          </div>
+        )}
 
-            {/* Value Props */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-4xl mx-auto">
-              {benefits.map((benefit, idx) => (
-                <div key={idx} className="flex flex-col items-center p-4 bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-xl">
-                  <div className="text-orange-400 mb-2">
+        {showMetaMaskModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-md relative">
+              <button 
+                onClick={() => setShowMetaMaskModal(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Wallet className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Connect MetaMask</h2>
+                <p className="text-gray-400">Connect your MetaMask wallet to start lending</p>
+              </div>
+              
+              <button
+                onClick={handleMetaMaskConnect}
+                className="w-full p-4 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 rounded-xl transition-all duration-200 text-center group mb-4"
+              >
+                <div className="flex items-center justify-center">
+                  <span className="text-2xl mr-4">🦊</span>
+                  <div>
+                    <div className="font-semibold">MetaMask</div>
+                    <div className="text-sm opacity-80">Connect using browser extension</div>
+                  </div>
+                </div>
+              </button>
+              
+              <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
+                <div className="flex items-start">
+                  <Shield className="w-5 h-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm">
+                    <div className="font-medium text-green-300 mb-1">Secure Lending</div>
+                    <div className="text-green-200/80">Your funds are protected by Bitcoin over-collateralization.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Navigation */}
+        <nav className="relative z-50 px-6 py-4">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="p-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg">
+                <Flame className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
+                Ember Protocol
+              </span>
+            </div>
+            
+            <div className="hidden md:flex items-center space-x-8">
+              <a href="#how-it-works" className="text-gray-300 hover:text-white transition-colors">How It Works</a>
+              <a href="#features" className="text-gray-300 hover:text-white transition-colors">Features</a>
+              <a href="#stats" className="text-gray-300 hover:text-white transition-colors">Stats</a>
+              
+              {connectedWallet || connectedMetaMask ? (
+                <div className="flex items-center space-x-3">
+                  {connectedWallet && (
+                    <div className="flex items-center px-3 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                      <span className="text-sm text-green-300">{connectedWallet}</span>
+                    </div>
+                  )}
+                  {connectedMetaMask && (
+                    <div className="flex items-center px-3 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
+                      <span className="text-sm text-blue-300">{connectedMetaMask.slice(0, 8)}...{connectedMetaMask.slice(-6)}</span>
+                    </div>
+                  )}
+                  <button 
+                    onClick={() => setCurrentPage('manage-loans')}
+                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-sm"
+                  >
+                    Manage Loans
+                  </button>
+                  <button 
+                    onClick={handleDisconnect}
+                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-sm"
+                  >
+                    Disconnect
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => setShowWalletModal(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-200 transform hover:scale-105"
+                >
+                  Connect Wallet
+                </button>
+              )}
+            </div>
+          </div>
+        </nav>
+
+        {/* Hero Section */}
+        <main className="relative z-10 px-6 pt-20 pb-32">
+          <div className="max-w-7xl mx-auto">
+            <div className={`text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <div className="mb-8">
+                <div className="inline-flex items-center px-4 py-2 bg-orange-500/10 border border-orange-500/20 rounded-full mb-6">
+                  <Bitcoin className="w-4 h-4 text-orange-400 mr-2" />
+                  <span className="text-sm text-orange-300">Native Bitcoin Collateralized Loans</span>
+                </div>
+              </div>
+              
+              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                <span className="bg-gradient-to-r from-white via-orange-200 to-red-200 bg-clip-text text-transparent">
+                  Unlock Liquidity
+                </span>
+                <br />
+                <span className="bg-gradient-to-r from-orange-400 via-red-400 to-yellow-400 bg-clip-text text-transparent">
+                  From Your Bitcoin
+                </span>
+              </h1>
+              
+              <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
+                Get instant USDC/USDT loans using your native Bitcoin as collateral. 
+                No bridging, no wrapping, no complexity - just one click to liquidity.
+              </p>
+
+              {/* Value Props */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-4xl mx-auto">
+                {benefits.map((benefit, idx) => (
+                  <div key={idx} className="flex flex-col items-center p-4 bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-xl">
+                    <div className="text-orange-400 mb-2">
+                      {benefit.icon}
+                    </div>
+                    <h3 className="text-sm font-semibold mb-1 text-center">{benefit.title}</h3>
+                    <p className="text-xs text-gray-400 text-center">{benefit.description}</p>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Launch App Button */}
+              <div className="mb-16">
+                <button 
+                  onClick={handleGetLoan}
+                  className="group relative px-12 py-6 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl text-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/25"
+                >
+                  <span className="flex items-center">
+                    <Bitcoin className="w-6 h-6 mr-3" />
+                    {connectedWallet ? 'Get Your Bitcoin Loan' : 'Connect Wallet to Start'}
+                    <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-400 rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                </button>
+                <p className="text-sm text-gray-400 mt-3">
+                  {connectedWallet ? 'One click • No bridging • Instant liquidity' : 'Connect your Bitcoin wallet to get started'}
+                </p>
+              </div>
+              
+              {/* Stats */}
+              <div id="stats" className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20">
+                {stats.map((stat, idx) => (
+                  <div key={idx} className="text-center">
+                    <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent mb-2">
+                      {stat.value}
+                    </div>
+                    <div className="text-gray-400 text-sm">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </main>
+
+        {/* Liquidity Provider Section */}
+        <section className="relative z-10 px-6 py-20 bg-gradient-to-r from-green-500/10 to-blue-500/10">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full mb-6">
+                <TrendingUp className="w-4 h-4 text-green-400 mr-2" />
+                <span className="text-sm text-green-300">Risk-Free Lending</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold mb-6">
+                <span className="bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
+                  Earn 4% APY Risk-Free
+                </span>
+              </h2>
+              <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+                Lend your USDC, USDT, and other stablecoins to earn guaranteed returns. 
+                100% backed by over-collateralized Bitcoin - no impermanent loss, no complexity.
+              </p>
+            </div>
+
+            {/* Benefits Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+              {lendingBenefits.map((benefit, idx) => (
+                <div key={idx} className="flex flex-col items-center p-6 bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-xl">
+                  <div className="text-green-400 mb-3">
                     {benefit.icon}
                   </div>
-                  <h3 className="text-sm font-semibold mb-1 text-center">{benefit.title}</h3>
+                  <h3 className="text-sm font-semibold mb-2 text-center">{benefit.title}</h3>
                   <p className="text-xs text-gray-400 text-center">{benefit.description}</p>
                 </div>
               ))}
             </div>
-            
-            {/* Launch App Button */}
-            <div className="mb-16">
+
+            {/* Comparison Table */}
+            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 mb-12">
+              <h3 className="text-2xl font-semibold mb-6 text-center">Why Ember Protocol Beats Traditional DeFi</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-700">
+                      <th className="text-left py-4 px-4">Feature</th>
+                      <th className="text-center py-4 px-4 text-green-400">Ember Protocol</th>
+                      <th className="text-center py-4 px-4 text-gray-400">AMM Liquidity Pools</th>
+                      <th className="text-center py-4 px-4 text-gray-400">Traditional Lending</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-gray-800">
+                      <td className="py-4 px-4 font-medium">Impermanent Loss</td>
+                      <td className="py-4 px-4 text-center text-green-400">✓ None</td>
+                      <td className="py-4 px-4 text-center text-red-400">✗ High Risk</td>
+                      <td className="py-4 px-4 text-center text-yellow-400">~ Variable</td>
+                    </tr>
+                    <tr className="border-b border-gray-800">
+                      <td className="py-4 px-4 font-medium">Guaranteed Returns</td>
+                      <td className="py-4 px-4 text-center text-green-400">✓ Fixed APY</td>
+                      <td className="py-4 px-4 text-center text-red-400">✗ Variable</td>
+                      <td className="py-4 px-4 text-center text-yellow-400">~ Depends</td>
+                    </tr>
+                    <tr className="border-b border-gray-800">
+                      <td className="py-4 px-4 font-medium">Collateral Security</td>
+                      <td className="py-4 px-4 text-center text-green-400">✓ Bitcoin Backed</td>
+                      <td className="py-4 px-4 text-center text-red-400">✗ No Collateral</td>
+                      <td className="py-4 px-4 text-center text-yellow-400">~ Mixed Assets</td>
+                    </tr>
+                    <tr className="border-b border-gray-800">
+                      <td className="py-4 px-4 font-medium">Liquidity Access</td>
+                      <td className="py-4 px-4 text-center text-green-400">✓ EP Tokens</td>
+                      <td className="py-4 px-4 text-center text-green-400">✓ LP Tokens</td>
+                      <td className="py-4 px-4 text-center text-red-400">✗ Locked</td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-4 font-medium">Complexity</td>
+                      <td className="py-4 px-4 text-center text-green-400">✓ One Click</td>
+                      <td className="py-4 px-4 text-center text-red-400">✗ Complex</td>
+                      <td className="py-4 px-4 text-center text-yellow-400">~ Moderate</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div className="text-center">
               <button 
-                onClick={handleGetLoan}
-                className="group relative px-12 py-6 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl text-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/25"
+                onClick={handleLendTokens}
+                className="group relative px-12 py-6 bg-gradient-to-r from-green-500 to-blue-500 rounded-2xl text-xl font-semibold hover:from-green-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-green-500/25"
               >
                 <span className="flex items-center">
-                  <Bitcoin className="w-6 h-6 mr-3" />
-                  {connectedWallet ? 'Get Your Bitcoin Loan' : 'Connect Wallet to Start'}
+                  <DollarSign className="w-6 h-6 mr-3" />
+                  {connectedMetaMask ? 'Start Earning Risk-Free Returns' : 'Connect MetaMask to Lend'}
                   <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-400 rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-400 rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity"></div>
               </button>
               <p className="text-sm text-gray-400 mt-3">
-                {connectedWallet ? 'One click • No bridging • Instant liquidity' : 'Connect your Bitcoin wallet to get started'}
+                {connectedMetaMask ? 'Earn guaranteed returns • Get tradeable EP tokens • 100% Bitcoin secured' : 'Connect MetaMask to start earning risk-free returns'}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section id="how-it-works" className="relative z-10 px-6 py-20 bg-gray-800/20">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6">
+                <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                  How It Works
+                </span>
+              </h2>
+              <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+                Three simple steps to unlock liquidity from your Bitcoin holdings
               </p>
             </div>
             
-            {/* Stats */}
-            <div id="stats" className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20">
-              {stats.map((stat, idx) => (
-                <div key={idx} className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent mb-2">
-                    {stat.value}
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <span className="text-2xl font-bold">1</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-4">Connect Your Bitcoin Wallet</h3>
+                <p className="text-gray-400">Connect your Bitcoin wallet - your BTC stays in your control, no custody required</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <span className="text-2xl font-bold">2</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-4">Set Loan Terms</h3>
+                <p className="text-gray-400">Choose your loan amount in USDC/USDT and collateral ratio - instant rate calculation</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <span className="text-2xl font-bold">3</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-4">Receive Instant Loan</h3>
+                <p className="text-gray-400">One click execution - receive USDC/USDT immediately while keeping your Bitcoin native</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section id="features" className="relative z-10 px-6 py-20">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6">
+                <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                  Why Choose Ember Protocol
+                </span>
+              </h2>
+              <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+                The most advanced Bitcoin collateralized lending platform with unmatched simplicity and security
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {features.map((feature, idx) => (
+                <div key={idx} className="group p-8 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl hover:border-orange-500/50 transition-all duration-300 hover:transform hover:scale-105">
+                  <div className="text-orange-400 mb-4 group-hover:scale-110 transition-transform">
+                    {feature.icon}
                   </div>
-                  <div className="text-gray-400 text-sm">{stat.label}</div>
+                  <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
+                  <p className="text-gray-400 leading-relaxed">{feature.description}</p>
                 </div>
               ))}
             </div>
           </div>
-        </div>
-      </main>
+        </section>
 
-      {/* Liquidity Provider Section */}
-      <section className="relative z-10 px-6 py-20 bg-gradient-to-r from-green-500/10 to-blue-500/10">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full mb-6">
-              <TrendingUp className="w-4 h-4 text-green-400 mr-2" />
-              <span className="text-sm text-green-300">Risk-Free Lending</span>
-            </div>
+        {/* CTA Section */}
+        <section className="relative z-10 px-6 py-20 bg-gradient-to-r from-orange-500/10 to-red-500/10">
+          <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
-                Earn 4% APY Risk-Free
+              <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                Ready to Unlock Your Bitcoin?
               </span>
             </h2>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
-              Lend your USDC, USDT, and other stablecoins to earn guaranteed returns. 
-              100% backed by over-collateralized Bitcoin - no impermanent loss, no complexity.
+            <p className="text-xl text-gray-400 mb-8">
+              Join thousands of Bitcoin holders who've discovered the power of native collateralized lending
             </p>
-          </div>
-
-          {/* Benefits Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-            {lendingBenefits.map((benefit, idx) => (
-              <div key={idx} className="flex flex-col items-center p-6 bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-xl">
-                <div className="text-green-400 mb-3">
-                  {benefit.icon}
-                </div>
-                <h3 className="text-sm font-semibold mb-2 text-center">{benefit.title}</h3>
-                <p className="text-xs text-gray-400 text-center">{benefit.description}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Comparison Table */}
-          <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 mb-12">
-            <h3 className="text-2xl font-semibold mb-6 text-center">Why Ember Protocol Beats Traditional DeFi</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-700">
-                    <th className="text-left py-4 px-4">Feature</th>
-                    <th className="text-center py-4 px-4 text-green-400">Ember Protocol</th>
-                    <th className="text-center py-4 px-4 text-gray-400">AMM Liquidity Pools</th>
-                    <th className="text-center py-4 px-4 text-gray-400">Traditional Lending</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-gray-800">
-                    <td className="py-4 px-4 font-medium">Impermanent Loss</td>
-                    <td className="py-4 px-4 text-center text-green-400">✓ None</td>
-                    <td className="py-4 px-4 text-center text-red-400">✗ High Risk</td>
-                    <td className="py-4 px-4 text-center text-yellow-400">~ Variable</td>
-                  </tr>
-                  <tr className="border-b border-gray-800">
-                    <td className="py-4 px-4 font-medium">Guaranteed Returns</td>
-                    <td className="py-4 px-4 text-center text-green-400">✓ Fixed APY</td>
-                    <td className="py-4 px-4 text-center text-red-400">✗ Variable</td>
-                    <td className="py-4 px-4 text-center text-yellow-400">~ Depends</td>
-                  </tr>
-                  <tr className="border-b border-gray-800">
-                    <td className="py-4 px-4 font-medium">Collateral Security</td>
-                    <td className="py-4 px-4 text-center text-green-400">✓ Bitcoin Backed</td>
-                    <td className="py-4 px-4 text-center text-red-400">✗ No Collateral</td>
-                    <td className="py-4 px-4 text-center text-yellow-400">~ Mixed Assets</td>
-                  </tr>
-                  <tr className="border-b border-gray-800">
-                    <td className="py-4 px-4 font-medium">Liquidity Access</td>
-                    <td className="py-4 px-4 text-center text-green-400">✓ EP Tokens</td>
-                    <td className="py-4 px-4 text-center text-green-400">✓ LP Tokens</td>
-                    <td className="py-4 px-4 text-center text-red-400">✗ Locked</td>
-                  </tr>
-                  <tr>
-                    <td className="py-4 px-4 font-medium">Complexity</td>
-                    <td className="py-4 px-4 text-center text-green-400">✓ One Click</td>
-                    <td className="py-4 px-4 text-center text-red-400">✗ Complex</td>
-                    <td className="py-4 px-4 text-center text-yellow-400">~ Moderate</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div className="text-center">
+            
             <button 
-              onClick={handleLendTokens}
-              className="group relative px-12 py-6 bg-gradient-to-r from-green-500 to-blue-500 rounded-2xl text-xl font-semibold hover:from-green-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-green-500/25"
+              onClick={handleGetLoan}
+              className="group relative px-12 py-6 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl text-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/25"
             >
               <span className="flex items-center">
-                <DollarSign className="w-6 h-6 mr-3" />
-                {connectedMetaMask ? 'Start Earning Risk-Free Returns' : 'Connect MetaMask to Lend'}
+                <Bitcoin className="w-6 h-6 mr-3" />
+                {connectedWallet ? 'Start Your First Loan' : 'Connect Bitcoin Wallet'}
                 <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
               </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-400 rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-400 rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity"></div>
             </button>
-            <p className="text-sm text-gray-400 mt-3">
-              {connectedMetaMask ? 'Earn guaranteed returns • Get tradeable EP tokens • 100% Bitcoin secured' : 'Connect MetaMask to start earning risk-free returns'}
-            </p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* How It Works Section */}
-      <section id="how-it-works" className="relative z-10 px-6 py-20 bg-gray-800/20">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+        {/* Community Section */}
+        <section id="community" className="relative z-10 px-6 py-20">
+          <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
               <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                How It Works
+                Join the Community
               </span>
             </h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              Three simple steps to unlock liquidity from your Bitcoin holdings
+            <p className="text-xl text-gray-400 mb-12">
+              Connect with Bitcoin holders and DeFi enthusiasts leveraging native Bitcoin collateral
             </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-2xl font-bold">1</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Connect Your Bitcoin Wallet</h3>
-              <p className="text-gray-400">Connect your Bitcoin wallet - your BTC stays in your control, no custody required</p>
-            </div>
             
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-2xl font-bold">2</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Set Loan Terms</h3>
-              <p className="text-gray-400">Choose your loan amount in USDC/USDT and collateral ratio - instant rate calculation</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-2xl font-bold">3</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Receive Instant Loan</h3>
-              <p className="text-gray-400">One click execution - receive USDC/USDT immediately while keeping your Bitcoin native</p>
+            <div className="flex justify-center space-x-6">
+              <a href="#" className="group p-4 bg-gray-800/50 border border-gray-700/50 rounded-xl hover:border-orange-500/50 transition-all duration-200 hover:transform hover:scale-105">
+                <Twitter className="w-6 h-6 text-gray-400 group-hover:text-orange-400" />
+              </a>
+              <a href="#" className="group p-4 bg-gray-800/50 border border-gray-700/50 rounded-xl hover:border-orange-500/50 transition-all duration-200 hover:transform hover:scale-105">
+                <MessageCircle className="w-6 h-6 text-gray-400 group-hover:text-orange-400" />
+              </a>
+              <a href="#" className="group p-4 bg-gray-800/50 border border-gray-700/50 rounded-xl hover:border-orange-500/50 transition-all duration-200 hover:transform hover:scale-105">
+                <Github className="w-6 h-6 text-gray-400 group-hover:text-orange-400" />
+              </a>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Features Section */}
-      <section id="features" className="relative z-10 px-6 py-20">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                Why Choose Ember Protocol
-              </span>
-            </h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              The most advanced Bitcoin collateralized lending platform with unmatched simplicity and security
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {features.map((feature, idx) => (
-              <div key={idx} className="group p-8 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl hover:border-orange-500/50 transition-all duration-300 hover:transform hover:scale-105">
-                <div className="text-orange-400 mb-4 group-hover:scale-110 transition-transform">
-                  {feature.icon}
+        {/* Footer */}
+        <footer className="relative z-10 px-6 py-12 border-t border-gray-800">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row items-center justify-between">
+              <div className="flex items-center space-x-2 mb-4 md:mb-0">
+                <div className="p-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg">
+                  <Flame className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                <p className="text-gray-400 leading-relaxed">{feature.description}</p>
+                <span className="font-semibold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
+                  Ember Protocol
+                </span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="relative z-10 px-6 py-20 bg-gradient-to-r from-orange-500/10 to-red-500/10">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-              Ready to Unlock Your Bitcoin?
-            </span>
-          </h2>
-          <p className="text-xl text-gray-400 mb-8">
-            Join thousands of Bitcoin holders who've discovered the power of native collateralized lending
-          </p>
-          
-          <button 
-            onClick={handleGetLoan}
-            className="group relative px-12 py-6 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl text-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/25"
-          >
-            <span className="flex items-center">
-              <Bitcoin className="w-6 h-6 mr-3" />
-              {connectedWallet ? 'Start Your First Loan' : 'Connect Bitcoin Wallet'}
-              <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-400 rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity"></div>
-          </button>
-        </div>
-      </section>
-
-      {/* Community Section */}
-      <section id="community" className="relative z-10 px-6 py-20">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-              Join the Community
-            </span>
-          </h2>
-          <p className="text-xl text-gray-400 mb-12">
-            Connect with Bitcoin holders and DeFi enthusiasts leveraging native Bitcoin collateral
-          </p>
-          
-          <div className="flex justify-center space-x-6">
-            <a href="#" className="group p-4 bg-gray-800/50 border border-gray-700/50 rounded-xl hover:border-orange-500/50 transition-all duration-200 hover:transform hover:scale-105">
-              <Twitter className="w-6 h-6 text-gray-400 group-hover:text-orange-400" />
-            </a>
-            <a href="#" className="group p-4 bg-gray-800/50 border border-gray-700/50 rounded-xl hover:border-orange-500/50 transition-all duration-200 hover:transform hover:scale-105">
-              <MessageCircle className="w-6 h-6 text-gray-400 group-hover:text-orange-400" />
-            </a>
-            <a href="#" className="group p-4 bg-gray-800/50 border border-gray-700/50 rounded-xl hover:border-orange-500/50 transition-all duration-200 hover:transform hover:scale-105">
-              <Github className="w-6 h-6 text-gray-400 group-hover:text-orange-400" />
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="relative z-10 px-6 py-12 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <div className="p-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg">
-                <Flame className="w-5 h-5 text-white" />
+              <div className="text-gray-400 text-sm">
+                © 2024 Ember Protocol. Native Bitcoin collateralized lending.
               </div>
-              <span className="font-semibold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
-                Ember Protocol
-              </span>
-            </div>
-            <div className="text-gray-400 text-sm">
-              © 2024 Ember Protocol. Native Bitcoin collateralized lending.
             </div>
           </div>
-        </div>
-      </footer>
-    </div>
+        </footer>
+      </div>
+    </>
   );
 }
 
